@@ -5,10 +5,17 @@ import argparse
 import re
 import sys
 from dataclasses import dataclass
+from decimal import Decimal
 from pathlib import Path
 
 
 DECLARATION_PREFIXES = ("scrap", "line", "point", "area")
+SECTION_SCRAP_RE = re.compile(
+    r'^(?P<indent>\s*)point\s+(?P<x>\S+)\s+(?P<y>\S+)\s+section\b.*\s-scrap\s+(?P<scrap>\S+)'
+)
+STATION_POINT_RE = re.compile(
+    r'^(?P<indent>\s*)point\s+(?P<x>\S+)\s+(?P<y>\S+)\s+station\b.*\s-name\s+(?P<name>\[[^\]]*\]|"[^"]*"|\S+)'
+)
 
 
 @dataclass
@@ -169,13 +176,130 @@ def convert_rock_border_close_on(text: str) -> EditResult:
     return EditResult("".join(out_lines), changed)
 
 
+def _strip_quoted_value(value: str) -> str:
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in {'"', "'"}:
+        return value[1:-1]
+    if value.startswith("[") and value.endswith("]"):
+        return value[1:-1].strip()
+    return value
+
+
+def _extract_station_name_from_scrap(scrap_name: str) -> str | None:
+    station_name = scrap_name.rsplit("-", 1)[-1].strip()
+    return station_name or None
+
+
+def _find_previous_nonempty_line(lines: list[str], start_index: int) -> int | None:
+    for index in range(start_index, -1, -1):
+        if lines[index].strip():
+            return index
+    return None
+
+
+def _has_adjacent_section_line(lines: list[str], station_index: int) -> bool:
+    previous_index = _find_previous_nonempty_line(lines, station_index - 1)
+    if previous_index is None or lines[previous_index].strip() != "endline":
+        return False
+
+    for index in range(previous_index - 1, -1, -1):
+        stripped = lines[index].strip()
+        if not stripped:
+            continue
+        if stripped.startswith("line section "):
+            return "-direction both" in stripped
+        if _line_is_declaration(stripped):
+            return False
+
+    return False
+
+
+def _format_decimal(value: Decimal) -> str:
+    text = format(value, "f")
+    if "." in text:
+        text = text.rstrip("0").rstrip(".")
+    return text or "0"
+
+
+def _offset_coordinate(value: str, delta: str) -> str:
+    return _format_decimal(Decimal(value) + Decimal(delta))
+
+
+def _build_section_line(indent: str, station_x: str, station_y: str) -> list[str]:
+    start_x = _offset_coordinate(station_x, "-10")
+    start_y = _offset_coordinate(station_y, "10")
+    end_x = _offset_coordinate(station_x, "10")
+    end_y = _offset_coordinate(station_y, "-10")
+
+    return [
+        f"{indent}line section -direction both\n",
+        f"{indent}  {start_x} {start_y}\n",
+        f"{indent}  {end_x} {end_y}\n",
+        f"{indent}  smooth off\n",
+        f"{indent}endline\n",
+        "\n",
+    ]
+
+
+def add_section_lines_for_scraps(text: str) -> EditResult:
+    lines = text.splitlines(keepends=True)
+    station_points: dict[str, tuple[int, str, str, str]] = {}
+    pending_station_names: set[str] = set()
+
+    for index, line in enumerate(lines):
+        section_match = SECTION_SCRAP_RE.match(line.rstrip("\n"))
+        if section_match is not None:
+            station_name = _extract_station_name_from_scrap(section_match.group("scrap"))
+            if station_name:
+                pending_station_names.add(station_name)
+            continue
+
+        station_match = STATION_POINT_RE.match(line.rstrip("\n"))
+        if station_match is None:
+            continue
+
+        station_points[_strip_quoted_value(station_match.group("name"))] = (
+            index,
+            station_match.group("indent"),
+            station_match.group("x"),
+            station_match.group("y"),
+        )
+
+    insertions: list[tuple[int, list[str]]] = []
+    for station_name in pending_station_names:
+        station_point = station_points.get(station_name)
+        if station_point is None:
+            continue
+
+        station_index, indent, station_x, station_y = station_point
+        if _has_adjacent_section_line(lines, station_index):
+            continue
+
+        insertions.append(
+            (
+                station_index,
+                _build_section_line(indent, station_x, station_y),
+            )
+        )
+
+    if not insertions:
+        return EditResult(text, 0)
+
+    changed = 0
+    for station_index, block in sorted(insertions, key=lambda item: item[0], reverse=True):
+        lines[station_index:station_index] = block
+        changed += 1
+
+    return EditResult("".join(lines), changed)
+
+
 def convert_all_default_types(text: str) -> EditResult:
     pit_result = convert_pit_to_floor_step(text)
     chimney_result = convert_chimney_to_ceiling_step(pit_result.text)
     rock_border_result = convert_rock_border_close_on(chimney_result.text)
+    section_result = add_section_lines_for_scraps(rock_border_result.text)
     return EditResult(
-        rock_border_result.text,
-        pit_result.changed + chimney_result.changed + rock_border_result.changed,
+        section_result.text,
+        pit_result.changed + chimney_result.changed + rock_border_result.changed + section_result.changed,
     )
 
 
@@ -237,7 +361,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     sub.add_parser(
         "all-conversions",
-        help="Apply all default conversions (pit, chimney, and rock-border)",
+        help="Apply all default conversions (pit, chimney, rock-border, and section lines)",
     )
 
     return parser

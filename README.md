@@ -39,6 +39,8 @@ If no command is provided, the script applies all default conversions:
 - `tests/`: unit tests for conversion and CLI behavior.
 - `data/`: sample and working `.th2` files (for example `data/AS-1p.th2`).
 
+Do not use `data/Elevator_SB-1p.th2` as an example or validation input. That file is known bad sample data.
+
 Run commands from the repository root so paths like `./data/AS-1p.th2` work as shown.
 
 ## Examples
