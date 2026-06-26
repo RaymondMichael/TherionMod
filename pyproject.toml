@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "th2-tool"
+version = "0.1.0"
+description = "CLI utilities to modify Therion .th2 files"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "CaveGraph workspace" }]
+
+[project.scripts]
+th2-edit = "th2_edit:main"
