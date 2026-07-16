@@ -1,30 +1,19 @@
 # th2-tool
 
-Small Python CLI to modify Therion `.th2` files with predictable text-safe operations.
-
-## Features
-
-- `replace`: literal or regex find/replace
-- `set-option`: set or append a Therion option on matching declaration lines
-- `delete-option`: remove a Therion option from matching declaration lines
-- `pit-to-floor-step`: convert every `line pit` declaration to `line floor-step`
-- `chimney-to-ceiling-step`: convert every `line chimney` declaration to `line ceiling-step -reverse on`
-- `rock-border-close-on`: ensure every `line rock-border` declaration includes `-close on`
-
-Declaration lines are lines that start with `scrap`, `line`, `point`, or `area`.
+Small Python CLI to modify Therion `.th2` files generated from TopoDroid to work better with Therion cartography style.
 
 ## Quick Start
-
-From this folder:
-
-```bash
-python3 -m unittest discover -s tests
-```
 
 Run the script directly:
 
 ```bash
 python3 th2_edit.py <file.th2> [command] [options]
+```
+
+From this folder:
+
+```bash
+python3 -m unittest discover -s tests
 ```
 
 If no command is provided, the script applies all default conversions:
@@ -38,8 +27,6 @@ If no command is provided, the script applies all default conversions:
 - `th2_edit.py`: main CLI script.
 - `tests/`: unit tests for conversion and CLI behavior.
 - `data/`: sample and working `.th2` files (for example `data/AS-1p.th2`).
-
-Do not use `data/Elevator_SB-1p.th2` as an example or validation input. That file is known bad sample data.
 
 Run commands from the repository root so paths like `./data/AS-1p.th2` work as shown.
 
