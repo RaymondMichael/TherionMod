@@ -32,56 +32,10 @@ Run commands from the repository root so paths like `./data/AS-1p.th2` work as s
 
 ## Examples
 
-Replace all `rock-border` to `rock-edge` and write to a new file:
-
-```bash
-python3 th2_edit.py ./data/AS-1p.th2 replace \
-  --find "rock-border" \
-  --replace "rock-edge" \
-  --output ./a_edited.th2
-```
-
-Set `-close off` for all border lines in place (with `.bak` backup):
-
-```bash
-python3 th2_edit.py ./data/AS-1p.th2 set-option \
-  --match "^line border" \
-  --option close \
-  --value off \
-  --in-place
-```
-
-Delete `-subtype` from matching lines:
-
-```bash
-python3 th2_edit.py ./data/AS-1p.th2 delete-option \
-  --match "^line border" \
-  --option subtype \
-  --output ./a_without_subtype.th2
-```
-
 Default conversion (no command):
 
 ```bash
 python3 th2_edit.py ./data/AS-1p.th2 --in-place
-```
-
-Equivalent explicit form:
-
-```bash
-python3 th2_edit.py ./data/AS-1p.th2 all-conversions --in-place
-```
-
-Convert all `line pit` to `line floor-step`:
-
-```bash
-python3 th2_edit.py ./data/AS-1p.th2 pit-to-floor-step --in-place
-```
-
-Convert all `line rock-border` to include `-close on`:
-
-```bash
-python3 th2_edit.py ./data/AS-1p.th2 rock-border-close-on --in-place
 ```
 
 ## Notes
