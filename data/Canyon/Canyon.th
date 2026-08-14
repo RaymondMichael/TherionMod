@@ -1,0 +1,223 @@
+encoding utf-8
+# 2026.07.26 created by TopoDroid 6.4.90
+
+survey Canyon -title "Canyon"
+
+  input "Canyon-1p.th2"
+  # input "Canyon-xs-GN2.th2"
+  # input "Canyon-xs-GN18.th2"
+
+  map m1p -projection plan
+    Canyon-1p
+  endmap
+
+  centerline
+    date 2026.07.25 
+    team "Michael Raymond"
+    team "Matthew Kok"
+    team "Hunter Poffinbarger"
+    units length feet
+    units compass clino degree
+    data normal from to length compass clino
+    extend left
+    GN2 GN1 13.10 14.2 -2.9
+    # extend auto
+    GN2 - 3.50 284.9 0.0
+    extend vertical
+    GN2 - 16.00 0.0 90.0
+    GN2 - 5.00 0.0 -90.0
+    extend right
+    GN1 GN2 13.20 194.9 3.1
+    extend left
+    GN3 GN2 28.30 53.2 -0.6
+    # extend auto
+    GN3 - 4.00 324.1 0.0
+    extend vertical
+    GN3 - 23.00 0.0 90.0
+    GN3 - 5.00 0.0 -90.0
+    extend right
+    GN2 GN3 28.50 234.1 0.5
+    extend left
+    GN4 GN3 8.90 88.2 0.3
+    # extend auto
+    GN4 - 3.00 177.9 0.0
+    GN4 - 0.50 357.9 0.0
+    extend vertical
+    GN4 - 18.00 0.0 90.0
+    GN4 - 5.00 0.0 -90.0
+    extend right
+    GN3 GN4 8.90 267.9 -0.6
+    extend left
+    GN5 GN4 14.10 63.8 -0.3
+    # extend auto
+    GN5 - 3.00 154.0 0.0
+    GN5 - 1.00 334.0 0.0
+    extend vertical
+    GN5 - 14.00 0.0 90.0
+    GN5 - 4.00 0.0 -90.0
+    extend right
+    GN4 GN5 14.30 244.0 0.4
+    extend left
+    GN6 GN5 19.30 56.8 2.9
+    # extend auto
+    GN6 - 1.50 146.7 0.0
+    GN6 - 2.00 326.7 0.0
+    extend vertical
+    GN6 - 22.00 0.0 90.0
+    GN6 - 3.50 0.0 -90.0
+    extend right
+    GN5 GN6 19.30 236.7 -3.0
+    extend left
+    GN7 GN6 17.00 47.3 -3.1
+    # extend auto
+    GN7 - 4.00 318.3 0.0
+    extend vertical
+    GN7 - 22.00 0.0 90.0
+    GN7 - 4.50 0.0 -90.0
+    extend right
+    GN6 GN7 16.50 228.3 3.4
+    extend left
+    GN8 GN7 12.50 111.2 -4.8
+    # extend auto
+    GN8 - 2.00 202.8 0.0
+    GN8 - 0.50 22.8 0.0
+    extend vertical
+    GN8 - 24.00 0.0 90.0
+    GN8 - 4.00 0.0 -90.0
+    extend right
+    GN7 GN8 12.50 292.8 4.8
+    extend left
+    GN9 GN8 21.20 96.2 0.7
+    # extend auto
+    GN9 - 2.50 5.8 0.0
+    extend vertical
+    GN9 - 26.00 0.0 90.0
+    GN9 - 3.50 0.0 -90.0
+    extend right
+    GN8 GN9 21.30 275.8 -0.2
+    extend left
+    GN10 GN9 18.60 108.1 -3.2
+    # extend auto
+    GN10 - 2.50 198.1 0.0
+    extend vertical
+    GN10 - 20.00 0.0 90.0
+    GN10 - 4.50 0.0 -90.0
+    extend right
+    GN9 GN10 18.70 288.1 3.1
+    extend left
+    GN11 GN10 10.10 101.4 2.5
+    # extend auto
+    GN11 - 3.00 191.2 0.0
+    extend vertical
+    GN11 - 18.00 0.0 90.0
+    GN11 - 4.00 0.0 -90.0
+    extend right
+    GN10 GN11 9.90 281.2 -2.3
+    extend left
+    GN12 GN11 21.70 92.7 -0.4
+    # extend auto
+    GN12 - 3.00 2.4 0.0
+    extend vertical
+    GN12 - 24.00 0.0 90.0
+    GN12 - 5.00 0.0 -90.0
+    extend right
+    GN11 GN12 21.70 272.4 0.9
+    extend left
+    GN13 GN12 21.30 108.2 0.0
+    # extend auto
+    GN13 - 3.00 198.0 0.0
+    extend vertical
+    GN13 - 24.00 0.0 90.0
+    GN13 - 4.00 0.0 -90.0
+    extend right
+    GN12 GN13 21.60 288.0 -0.6
+    extend left
+    GN14 GN13 19.00 91.7 -0.5
+    # extend auto
+    GN14 - 3.00 1.2 0.0
+    extend vertical
+    GN14 - 18.00 0.0 90.0
+    GN14 - 5.00 0.0 -90.0
+    extend right
+    GN13 GN14 19.10 271.2 0.3
+    extend left
+    GN15 GN14 23.50 102.5 6.7
+    # extend auto
+    GN15 - 0.50 192.1 0.0
+    GN15 - 2.00 12.1 0.0
+    extend vertical
+    GN15 - 25.00 0.0 90.0
+    GN15 - 2.00 0.0 -90.0
+    extend right
+    GN14 GN15 23.40 282.1 -6.6
+    extend left
+    GN16 GN15 21.20 105.2 -7.0
+    # extend auto
+    GN16 - 4.00 194.9 0.0
+    extend vertical
+    GN16 - 13.00 0.0 90.0
+    GN16 - 4.00 0.0 -90.0
+    extend right
+    GN15 GN16 21.20 284.9 6.5
+    extend left
+    GN17 GN16 13.40 88.8 -2.8
+    # extend auto
+    GN17 - 3.50 178.6 0.0
+    extend vertical
+    GN17 - 17.00 0.0 90.0
+    GN17 - 4.00 0.0 -90.0
+    extend right
+    GN16 GN17 13.50 268.6 3.3
+    extend left
+    GN18 GN17 16.60 50.5 1.0
+    # extend auto
+    GN18 - 3.50 320.8 0.0
+    extend vertical
+    GN18 - 17.00 0.0 90.0
+    GN18 - 4.00 0.0 -90.0
+    extend right
+    GN17 GN18 16.50 230.8 -0.6
+    extend left
+    GN19 GN18 8.90 63.6 -9.9
+    # extend auto
+    GN19 - 1.00 154.0 0.0
+    GN19 - 2.00 334.0 0.0
+    extend vertical
+    GN19 - 14.00 0.0 90.0
+    GN19 - 6.00 0.0 -90.0
+    extend right
+    GN18 GN19 8.90 244.0 9.8
+    extend left
+    AS31 GN19 10.00 59.0 -0.3
+    # extend auto
+    AS31 - 2.00 149.3 0.0
+    AS31 - 1.50 329.3 0.0
+    extend vertical
+    AS31 - 20.00 0.0 90.0
+    AS31 - 5.50 0.0 -90.0
+    extend right
+    GN19 AS31 9.90 239.3 0.7
+    units left right up down feet
+    data dimensions station left right up down
+    GN11 0.00 3.00 18.00 4.00
+    GN10 0.00 2.50 20.00 4.50
+    GN13 0.00 3.00 24.00 4.00
+    GN12 3.00 0.00 24.00 5.00
+    GN2 3.50 0.00 16.00 5.00
+    GN15 2.00 0.50 25.00 2.00
+    GN14 3.00 0.00 18.00 5.00
+    GN4 0.50 3.00 18.00 5.00
+    GN17 0.00 3.50 17.00 4.00
+    GN3 4.00 0.00 23.00 5.00
+    GN16 0.00 4.00 13.00 4.00
+    GN6 2.00 1.50 22.00 3.50
+    GN19 2.00 1.00 14.00 6.00
+    AS31 1.50 2.00 20.00 5.50
+    GN5 1.00 3.00 14.00 4.00
+    GN18 3.50 0.00 17.00 4.00
+    GN8 0.50 2.00 24.00 4.00
+    GN7 4.00 0.00 22.00 4.50
+    GN9 2.50 0.00 26.00 3.50
+  endcenterline
+
+endsurvey

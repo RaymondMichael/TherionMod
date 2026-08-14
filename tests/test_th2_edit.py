@@ -11,6 +11,7 @@ from th2_edit import (
     convert_rock_border_close_on,
     delete_option,
     main,
+    mark_backsights_as_duplicate,
     replace_text,
     set_option,
 )
@@ -131,6 +132,21 @@ class Th2EditTests(unittest.TestCase):
         self.assertEqual(result.changed, 0)
         self.assertEqual(result.text, src)
 
+    def test_add_section_lines_for_scraps_preserves_tab_indentation(self) -> None:
+        src = (
+            "scrap demo -projection plan\n"
+            "\tline wall\n"
+            "\t\t0 0\n"
+            "\tendline\n"
+            "point 10 20 section -scrap AS-xs-AS12\n"
+            "point 100 200 station -name \"AS12\"\n"
+        )
+
+        result = add_section_lines_for_scraps(src)
+
+        self.assertEqual(result.changed, 1)
+        self.assertIn("line section -direction both\n\t90 210\n\t110 190\n\tsmooth off\nendline\n", result.text)
+
     def test_default_command_adds_section_lines(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             tmp_path = Path(tmp)
@@ -158,6 +174,126 @@ class Th2EditTests(unittest.TestCase):
                 "\n"
                 "point 100 200 station -name \"AS12\"\n",
             )
+
+    def test_mark_backsights_marks_station_leg_after_extend_left(self) -> None:
+        src = (
+            "    extend left\n"
+            "    GN2 GN1 13.10 14.2 -2.9\n"
+            "    # extend auto\n"
+            "    GN2 - 3.50 284.9 0.0\n"
+            "    extend right\n"
+            "    GN1 GN2 13.20 194.9 3.1\n"
+        )
+
+        result = mark_backsights_as_duplicate(src)
+
+        self.assertEqual(result.changed, 1)
+        self.assertEqual(
+            result.text,
+            "    extend left\n"
+            "    flags duplicate\n"
+            "    GN2 GN1 13.10 14.2 -2.9\n"
+            "    flags not duplicate\n"
+            "    # extend auto\n"
+            "    GN2 - 3.50 284.9 0.0\n"
+            "    extend right\n"
+            "    GN1 GN2 13.20 194.9 3.1\n",
+        )
+
+    def test_mark_backsights_is_idempotent(self) -> None:
+        src = "extend left\nGN2 GN1 13.10 14.2 -2.9\n"
+
+        first_result = mark_backsights_as_duplicate(src)
+        second_result = mark_backsights_as_duplicate(first_result.text)
+
+        self.assertEqual(second_result.changed, 0)
+        self.assertEqual(second_result.text, first_result.text)
+
+    def test_default_command_marks_backsights_in_th_file(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            input_path = tmp_path / "in.th"
+            output_path = tmp_path / "out.th"
+            input_path.write_text(
+                "line pit\nextend left\nGN2 GN1 13.10 14.2 -2.9\n",
+                encoding="utf-8",
+            )
+
+            exit_code = main([str(input_path), "--output", str(output_path)])
+
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(
+                output_path.read_text(encoding="utf-8"),
+                "line pit\nextend left\nflags duplicate\nGN2 GN1 13.10 14.2 -2.9\nflags not duplicate\n",
+            )
+
+    def test_no_mark_backsights_leaves_th_file_unchanged(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            input_path = tmp_path / "in.th"
+            output_path = tmp_path / "out.th"
+            source = "extend left\nGN2 GN1 13.10 14.2 -2.9\n"
+            input_path.write_text(source, encoding="utf-8")
+
+            exit_code = main([str(input_path), "--no-mark-backsights", "--output", str(output_path)])
+
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(output_path.read_text(encoding="utf-8"), source)
+
+    def test_directory_input_processes_th_and_th2_files_in_place(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            th_path = tmp_path / "survey.th"
+            th2_path = tmp_path / "drawing.th2"
+            ignored_path = tmp_path / "notes.txt"
+            nested_path = tmp_path / "nested"
+            th_path.write_text("extend left\nGN2 GN1 13.10 14.2 -2.9\n", encoding="utf-8")
+            th2_path.write_text("line pit\n", encoding="utf-8")
+            ignored_path.write_text("line pit\n", encoding="utf-8")
+            nested_path.mkdir()
+            (nested_path / "nested.th2").write_text("line pit\n", encoding="utf-8")
+
+            exit_code = main([str(tmp_path), "--no-backup"])
+
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(
+                th_path.read_text(encoding="utf-8"),
+                "extend left\nflags duplicate\nGN2 GN1 13.10 14.2 -2.9\nflags not duplicate\n",
+            )
+            self.assertEqual(th2_path.read_text(encoding="utf-8"), "line floor-step\n")
+            self.assertEqual(ignored_path.read_text(encoding="utf-8"), "line pit\n")
+            self.assertEqual((nested_path / "nested.th2").read_text(encoding="utf-8"), "line pit\n")
+
+    def test_directory_input_does_not_create_backups(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            changed_path = tmp_path / "drawing.th2"
+            unchanged_path = tmp_path / "survey.th"
+            changed_path.write_text("line pit\n", encoding="utf-8")
+            unchanged_path.write_text("extend left\nflags duplicate\nGN2 GN1 13.10 14.2 -2.9\n", encoding="utf-8")
+
+            exit_code = main([str(tmp_path)])
+
+            self.assertEqual(exit_code, 0)
+            self.assertFalse(changed_path.with_suffix(".th2.bak").exists())
+            self.assertFalse(unchanged_path.with_suffix(".th.bak").exists())
+
+    def test_in_place_edits_preserve_crlf_line_endings(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            th_path = tmp_path / "survey.th"
+            th2_path = tmp_path / "drawing.th2"
+            th_path.write_bytes(b"extend left\r\nGN2 GN1 13.10 14.2 -2.9\r\n")
+            th2_path.write_bytes(b"line pit\r\n")
+
+            self.assertEqual(main([str(th_path), "--in-place", "--no-backup"]), 0)
+            self.assertEqual(main([str(th2_path), "--in-place", "--no-backup"]), 0)
+
+            self.assertEqual(
+                th_path.read_bytes(),
+                b"extend left\r\nflags duplicate\r\nGN2 GN1 13.10 14.2 -2.9\r\nflags not duplicate\r\n",
+            )
+            self.assertEqual(th2_path.read_bytes(), b"line floor-step\r\n")
 
 
 if __name__ == "__main__":
