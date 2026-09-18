@@ -1,0 +1,660 @@
+layout common
+# debug all
+
+code metapost
+
+boolean running_in_legend;
+running_in_legend := false;
+
+# Colors 0.4, 0.6 looks good below, but hard to see other stuff on top of it
+def a_u_blocks (expr p) =
+    T:=identity;
+    path q;
+    q = bbox p;
+    picture tmp_pic;
+    uu := max(u, (xpart urcorner q - xpart llcorner q)/100, (ypart urcorner q - ypart llcorner q)/100);
+    tmp_pic := image(
+      for i = xpart llcorner q step 0.6uu until xpart urcorner q:
+        for j = ypart llcorner q step 0.6uu until ypart urcorner q:
+          path qq;
+          qq = punked(((-.25uu,-.25uu)--(.25uu,-.25uu)--(.25uu,.25uu)--(-.25uu,.25uu)--cycle)
+            randomized (uu/2))
+            rotated uniformdeviate(360) 
+            shifted ((i,j) randomized 1.0uu);
+          if xpart (p intersectiontimes qq) < 0:
+            thclean qq;
+            thdraw qq withpen PenC;
+            thfill qq withcolor (0.6,0.6,0.6);
+#            thfill qq withcolor (0.8,0.8,0.8);
+            pair aa, bb, cc, dd;
+            path rr;
+            aa := point 0 of qq;
+            bb := point 1 of qq;
+            cc := point 2 of qq;
+            dd := point 3 of qq;
+            rr := aa--bb--1/4[bb,dd]--1/4[aa,cc]--cycle;
+            thclean rr;
+            thdraw rr withpen PenD;
+            thfill rr withcolor (0.8,0.8,0.8);
+#            thfill rr withcolor (0.9,0.9,0.9);
+          fi;
+        endfor;
+      endfor;
+    );
+    clip tmp_pic to p;
+    thdraw tmp_pic;
+  enddef;
+
+initsymbol("a_u_blocks");
+let a_blocks = a_u_blocks;
+
+
+def a_u_clay (expr p) =
+  T:=identity;
+  thclean p;
+  pickup PenC;
+  path q, qq; q = bbox p;
+  picture tmp_pic;
+  tmp_pic := image(
+    for i = xpart llcorner q step 0.75u until xpart urcorner q:
+      for j = ypart llcorner q step 0.5u until ypart urcorner q:
+        qq := ((-.125u,0)--(.125u,0)) shifted(i,j);
+        thdraw qq withpen PenD withcolor (0.5, 0.5, 0.5);
+        qq := ((-.125u,0)--(.125u,0)) shifted(i + 0.37u, j + 0.25u);
+        thdraw qq withpen PenD withcolor (0.5, 0.5, 0.5);
+      endfor;
+    endfor;
+  );
+  clip tmp_pic to p;
+  draw tmp_pic;
+enddef;
+
+initsymbol("a_u_clay");
+let a_clay = a_u_clay;
+
+
+# Cobbles, small breakdown
+def a_u_debris (expr p) =
+   T:=identity;
+   thclean p;
+   path q; q = bbox p;
+   picture tmp_pic;
+   path qq;
+   tmp_pic := image(
+   for i = xpart llcorner q step 0.3u until xpart urcorner q:
+     for j = ypart llcorner q step 0.3u until ypart urcorner q:
+       qq := ((-.1u,0)--(.2u,0)--(0,.2u)--cycle) rotated uniformdeviate(360)
+         shifted((i,j) randomized 0.3u);
+       thdraw qq withpen PenC;
+       thfill qq withcolor (0.9,0.9,0.9);
+     endfor;
+   endfor;
+  );
+  clip tmp_pic to p;
+  draw tmp_pic;
+  enddef;
+
+initsymbol("a_u_debris");
+let a_debris = a_u_debris;
+
+
+def a_u_pebbles (expr p) =
+      T:=identity;
+      thclean p;
+      pickup PenC;
+      path q, qq; q = bbox p;
+      picture tmp_pic; 
+      tmp_pic := image(
+        for i = xpart llcorner q step 0.4u until xpart urcorner q:
+          for j = ypart llcorner q step 0.4u until ypart urcorner q:
+            qq := (superellipse((.1u,0),(0,.05u),(-.1u,0),(0,.-.05u),0.75))
+              randomized (u/25)
+            rotated uniformdeviate(360) 
+            shifted ((i,j) randomized 0.6u);
+            if xpart (p intersectiontimes qq) < 0:
+              thdraw qq;
+            fi;
+          endfor;  
+        endfor;
+      );
+      clip tmp_pic to p;
+      draw tmp_pic;
+enddef;
+
+initsymbol("a_u_pebbles");
+let a_pebbles = a_u_pebbles;
+
+
+# At other scales, step of 0.4u and randomized 0.3u looks OK
+def a_u_sand (expr p) =
+    T:=identity;
+    thclean p;
+    pickup PenC;
+    path q; q = bbox p;
+    picture tmp_pic;
+    tmp_pic := image(
+      for i = xpart llcorner q step 0.5u until xpart urcorner q:
+        for j = ypart llcorner q step 0.5u until ypart urcorner q:
+          draw origin shifted ((i,j) randomized 1.0u) withpen PenC;
+        endfor;
+      endfor;
+    );
+    clip tmp_pic to p;
+    draw tmp_pic;
+  enddef;
+
+initsymbol("a_u_sand");
+let a_sand = a_u_sand;
+
+
+def a_u_water (expr p) =
+  T:=identity;
+  thfill p withcolor (0.48, 0.84, 1.0);
+enddef;
+
+initsymbol("a_u_water");
+let a_water = a_u_water;
+
+
+def a_u_sump (expr p) =
+  T:=identity;
+  thfill p withcolor (0.22, 0.62, 0.96);
+enddef;
+
+initsymbol("a_u_sump");
+let a_sump = a_u_sump;
+
+
+def p_u_blocks (expr pos, rot, scale, alignment) =
+  U:=(1u,1u);
+  T:=identity aligned alignment rotated rot scaled (1.5*scale) shifted pos;
+  path qq, rr;
+  pair aa, bb, cc, dd;
+  qq := punked (((-.25u,-.25u)--(.25u,-.25u)--(.25u,.25u)--(-.25u,.25u)--cycle)
+            randomized (u/2))
+            rotated uniformdeviate(360);
+  # This clears any prior existing color, overlapping lines
+  thclean qq;
+  thdraw qq withpen PenC;
+  thfill qq withcolor (0.6,0.6,0.6);
+  aa := point 0 of qq;
+  bb := point 1 of qq;
+  cc := point 2 of qq;
+  dd := point 3 of qq;
+  rr := aa--bb--1/4[bb,dd]--1/4[aa,cc]--cycle;
+  # This clears any prior existing color, overlapping lines
+  thclean rr;
+  thdraw rr withpen PenD;
+  thfill rr withcolor (0.8,0.8,0.8);
+
+enddef;
+
+initsymbol ("p_u_blocks");
+let p_blocks = p_u_blocks;
+
+
+def p_u_clay(expr pos,theta,sc,al) =
+    U:=(.3u,.3u);
+    T:=identity aligned al rotated theta scaled sc shifted pos;
+    pickup PenC;
+    qq := ((-.125u, 0)--(.125u, 0));
+    thdraw qq shifted (-4,0) withpen PenD withcolor (0.5, 0.5, 0.5);
+    thdraw qq shifted (4,0) withpen PenD withcolor (0.5, 0.5, 0.5);
+    thdraw qq shifted (0,4) withpen PenD withcolor (0.5, 0.5, 0.5);
+    thdraw qq shifted (0,-4) withpen PenD withcolor (0.5, 0.5, 0.5);
+enddef;
+
+initsymbol ("p_u_clay");
+let p_clay = p_u_clay;
+
+
+def p_u_debris (expr pos,theta,sc,al)=
+    U:=(.4u,.4u);
+    T:=identity aligned al rotated theta scaled sc shifted pos;
+
+    path qq, rr, ss;
+    qq := ((-.1u,.25u)--(.2u,.25u)--(0,.45u)--cycle);
+    thdraw qq withpen PenC;
+    thfill qq withcolor (0.9,0.9,0.9);
+
+    qq := ((-.15u,-.35u)--(.15u,-.35u)--(-.05u,-0.15u)--cycle);
+    rr := qq rotated 60;
+    thdraw rr withpen PenC;
+    thfill rr withcolor (0.9,0.9,0.9);
+
+    ss := ((-.35u,-.25u)--(-0.05u,-.25u)--(-0.25u,-0.05u)--cycle);
+    thdraw ss withpen PenC;
+    thfill ss withcolor (0.9,0.9,0.9);
+enddef;
+
+initsymbol ("p_u_debris");
+let p_debris = p_u_debris;
+
+
+def p_u_pebbles  (expr pos,theta,sc,al) =
+    U:=(.45u,.35u);
+    T:=identity aligned al rotated theta scaled sc shifted pos;
+    pickup PenC;
+    p := (superellipse((.1u,0),(0,.05u),(-.1u,0),(0,.-.05u),0.75));
+    thdraw p rotated 20 shifted (0,.25u) randomized (u/25);
+    thdraw p rotated -37 shifted (.25u,0) randomized (u/25);
+    thdraw p rotated -62 shifted (-.25u,0) randomized (u/25);
+    thdraw p rotated -89 shifted (0,-.25u) randomized (u/25);
+enddef;
+
+initsymbol ("p_u_pebbles");
+let p_pebbles = p_u_pebbles;
+
+
+def p_u_sand (expr pos,theta,sc,al)=
+    U:=(.2u,.2u);
+    T:=identity aligned al rotated theta scaled sc shifted pos;
+    pickup PenB;
+    thdraw (0,.2u);
+    thdraw (0,.2u) rotated 120;
+    thdraw (0,.2u) rotated 240;
+enddef;
+
+initsymbol ("p_u_sand");
+# let p_sand = p_u_sand;
+
+def l_u_blocks (expr P) =
+  T:=identity;
+  cas := 0;
+  totlen := arclength P;
+if totlen > 0:
+  steplen := adjust_step(totlen, 5.0u);
+  pickup PenA;
+  forever:
+    t1 := arctime (cas + steplen * 1/10) of P;
+    t2 := arctime (cas + steplen * 9/10) of P;
+    q := ((point t1 of P) + .1u * unitvector(thdir(P,t1) rotated -90)) --
+         (subpath (t1,t2) of P) --
+         ((point t2 of P) + .1u * unitvector(thdir(P,t2) rotated -90));
+    thdraw q;% randomized (u/6);
+    cas := cas + steplen;
+    exitif cas > totlen - (2 * steplen /3); % for rounding errors
+  endfor;
+fi;
+enddef;
+
+initsymbol("l_u_blocks");
+let l_wall_blocks = l_u_blocks;
+
+def l_u_clay (expr P) =
+  T := identity;
+  cas := 0;
+  totlen := arclength P;
+  steplen := adjust_step(totlen, .5u);
+  pickup PenC;
+  q := (-.125u,0)--(.125u,0);
+  forever:
+    t := arctime (cas + steplen/2 - 1.0) of P;
+    thdraw q shifted (point t of P) withcolor (0.5, 0.5, 0.5);
+    t := arctime (cas + steplen/2 + 2.0) of P;
+    thdraw q shifted (point t of P + .2u * unitvector(thdir(P,t) rotated -90)) withcolor (0.5, 0.5, 0.5);
+    cas := cas + steplen;
+    exitif cas > totlen - (2 * steplen / 3); % for rounding errors
+  endfor;
+enddef;
+
+initsymbol("l_u_clay");
+let l_wall_clay = l_u_clay;
+
+
+def l_u_ceilingmeander(expr P) =
+  pair Pp;
+  pair Pd;
+  pair Pv;
+  T := identity;
+  cas := 0;
+  totlen := arclength P;
+  steplen := adjust_step(totlen, 0.8u);
+  pickup PenC;
+  forever:
+    t  := arctime(cas + steplen / 2) of P;
+    Pp := (point t of P);
+    Pd := unitvector(thdir(P,t));
+    Pv := Pd rotated 90;
+    thdraw (Pp - 0.1u * Pv) --
+          (Pp + 0.1u * Pv);
+    thdraw (Pp + 0.0u * Pv + 0.2u * Pd) --
+          (Pp + 0.0u * Pv - 0.2u * Pd);
+    cas := cas + steplen;
+    exitif cas > totlen - (2 * steplen / 3); % for rounding errors
+  endfor;
+enddef;
+
+initsymbol("l_u_ceilingmeander");
+let l_ceilingmeander = l_u_ceilingmeander;
+
+
+def l_u_u (expr P) =
+  T:=identity;
+  pickup PenD;
+  thdraw P withcolor black;
+enddef;
+
+initsymbol("l_u_u");
+let l_u_user = l_u_u;
+
+
+# This defines the rockborder you'll see on the map
+def l_u_rockborder_map (expr p) =
+  save q, t, segs, turn, iscycle, inc, originalpt, parallelpt, nextpt, nextpar;
+  path q;
+  numeric t, segs, turn, inc;
+  boolean iscycle;
+  pair originalpt, parallelpt, nextpt, nextpar;
+
+  if length p > 0:
+    segs := length p;
+
+    % Cycle test
+    iscycle := cycle p;
+
+    % Clean before drawing, for cycles
+    if iscycle:
+      thclean p;
+    else:
+      % not a cycle, no cleaning
+    fi
+
+    % Draw original with PenC
+    thdraw p withpen PenC;
+
+    % Inward rotation for cycles, left for open paths
+    if iscycle:
+      if turningnumber p > 0:
+        turn := 90;
+      elseif turningnumber p < 0:
+        turn := -90;
+      else:
+        turn := 90;
+      fi
+    else:
+      turn := 90;
+    fi
+
+    % Build straight-segment parallel with same segment count
+    q := (point 0 of p) + (0.1u) * unitvector(thdir(p,0) rotated turn);
+
+    inc := 1;
+    t := inc;
+    forever:
+      exitif t > segs;
+      q := q -- ((point t of p)
+                 + (0.1u) * unitvector(thdir(p,t) rotated turn));
+      t := t + inc;
+    endfor;
+
+    q := q -- cycle;
+
+    % Fill the entire parallel region light gray
+    thfill q withcolor if iscycle: (0.6, 0.6, 0.6) else: (0.1,0.6,0.6) fi;
+
+    % Fill each quad between corresponding successive points in dark gray
+    t := 0;
+    forever:
+      exitif t >= segs;
+      originalpt := point t of p;
+      nextpt     := point (t + inc) of p;
+      parallelpt := originalpt + (0.1u) * unitvector(thdir(p,t) rotated turn);
+      nextpar    := nextpt     + (0.1u) * unitvector(thdir(p,t + inc) rotated turn);
+      thfill originalpt -- nextpt -- nextpar -- parallelpt -- cycle
+            withcolor if iscycle: (0.8, 0.8, 0.8) else: (0.1,0.8,0.8) fi;
+      t := t + inc;
+    endfor;
+
+    % Outline the parallel path with PenD
+    thdraw q withpen PenD;
+
+    % Draw connecting lines between corresponding points
+    t := 0;
+    forever:
+      exitif t > segs;
+      originalpt := point t of p;
+      parallelpt := originalpt + (0.1u) * unitvector(thdir(p,t) rotated turn);
+      thdraw (originalpt -- parallelpt) withcolor (0.4, 0.4, 0.4) withpen PenD;
+      t := t + inc;
+    endfor;
+  fi
+enddef;
+
+initsymbol("l_u_rockborder_map");
+
+
+# This defines the rock border you'll see in the legend
+def l_u_rockborder_legend =
+    path q;
+
+    q:= (1, 0.5) -- (1, -1) -- (-0.5, 0) -- (-0.5, 1.5) -- cycle;
+    l_u_rockborder_map(q scaled 10);
+enddef;
+
+initsymbol("l_u_rockborder_legend");
+
+
+# Call the rock border function for the map or the legend
+def l_u_rockborder (expr P) =
+    if running_in_legend:
+       l_u_rockborder_legend;
+    else:
+       l_u_rockborder_map(P);
+    fi
+enddef;
+
+initsymbol("l_u_rockborder");
+let l_rockborder = l_u_rockborder;
+
+def l_u_section (expr P)(text txt) =
+  T:=identity;
+  path Q; Q = punked P;
+  pickup PenC;
+  for t = 0 upto length P - 1:
+    pair zz[];
+    zz1 := point t of P;
+    zz2 := point t+1 of P;
+    zz3 := postcontrol t of P;
+    zz4 := precontrol t+1 of P;
+    if (length(zz3-1/3[zz1,zz2]) > 0.1pt) or
+       (length(zz4-2/3[zz1,zz2]) > 0.1pt):
+      zz5 = whatever[zz1,zz2];
+      (zz3-zz5) = whatever * (zz1-zz2) rotated 90;
+      draw zz1--zz5;
+      zz6 = whatever[zz1,zz2];
+      (zz4-zz6) = whatever * (zz1-zz2) rotated 90;
+      draw zz2--zz6;
+    else:
+      draw zz1--zz2;
+    fi;
+  endfor;
+  for pnt=txt:
+    if pnt=-1:
+    else:
+      T:=identity rotated angle(thdir(Q,pnt)) shifted (point pnt of Q);
+      pickup PenC;
+      thdraw (0,0)--(0,.3u);
+      thdraw (-.1u,.1u)--(0,.3u)--(.1u,.1u);
+    fi;
+    exitif pnt=-1;
+  endfor;
+enddef;
+
+initsymbol("l_u_section");
+let l_section = l_u_section;
+
+
+# We repurpose this line to represent a fill choke
+def l_u_wall_underlying (expr P) =
+  T:=identity;
+  pickup PenD;
+  thdraw polyline_offset(P, 0.4u, -90);   
+  thdraw polyline_offset(P, 0.6u, -90);
+enddef;
+
+initsymbol("l_u_wall_underlying");
+let l_wall_underlying = l_u_wall_underlying;
+
+def l_u_slope (expr P,S)(text Q) =
+%show Q;
+  T:=identity;
+  numeric dirs[];
+  numeric lengths[];
+  for i=Q:
+    dirs[redpart i]:=greenpart i;
+    lengths[redpart i]:=bluepart i;
+  endfor;
+
+
+  li:=length(P); % last
+
+  alw_perpendicular:=true;
+
+  for i=0 upto li:
+    if unknown dirs[i]: dirs[i]:=-1;
+    else:
+      if dirs[i]>-1:
+        dirs[i]:=((90-dirs[i]) - angle(thdir(P,i))) mod 360;
+        alw_perpendicular:=false;
+      fi;
+    fi;
+    if unknown lengths[i]: lengths[i]:=-1; fi;
+  endfor;
+
+%for i=0 upto li: show dirs[i]; endfor;
+
+  ni:=0; % next
+  pi:=0; % previous
+
+  for i=0 upto li:
+    d:=dirs[i];
+    if d=-1:
+      if (i=0) or (i=li):
+        dirs[i] := angle(thdir(P,i) rotated 90) mod 360;
+	pi:=i;
+      else:
+        if ni<=i:
+	  for j=i upto li:
+            ni:=j;
+	    exitif dirs[j]>-1;
+	  endfor;
+	fi;
+	w:=arclength(subpath(pi,i) of P) /
+	   arclength(subpath(pi,ni) of P);
+	dirs[i]:=w[dirs[pi],dirs[ni]];
+%        if (dirs[i]-angle(thdir(P,i))) mod 360>180:
+%          dirs[i]:=w[dirs[ni],dirs[pi]];
+%	  message("*******");
+%        fi;
+     fi;
+    else:
+      pi:=i;
+    fi;
+  endfor;
+
+%for i=0 upto li: show dirs[i]; endfor;
+
+  ni:=0; % next
+  pi:=0; % previous
+
+  for i=0 upto li:
+    l:=lengths[i];
+    if l=-1:
+      if (i=0) or (i=li):
+        lengths[i] := 1cm; % should never happen!
+	thwarning("slope width at the end point not specified");
+	pi:=i;
+      else:
+        if ni<=i:
+	  for j=i+1 upto li:
+            ni:=j;
+	    exitif lengths[j]>-1;
+	  endfor;
+	fi;
+	w:=arclength(subpath(pi,i) of P) /
+	   arclength(subpath(pi,ni) of P);
+	lengths[i]:=w[lengths[pi],lengths[ni]];
+	pi:=i;
+      fi;
+    else:
+      pi:=i;
+    fi;
+  endfor;
+
+% for i=0 upto li: show lengths[i]; endfor;
+
+  T:=identity;
+  boolean par;
+  offset:=0;
+  dlzka := (arclength P);
+  if dlzka>3u:
+    offset := 0.3u;
+  elseif dlzka>u:
+    offset := 0.1u;
+  fi;
+  dlzka:=dlzka-2offset;
+  cas := offset;
+  mojkrok:=adjust_step(dlzka,0.7u) / 2;
+  pickup PenB;
+  par := false;
+  forever:
+    t := arctime cas of P;
+    if t mod 1>0:  % not a key point
+      w := (arclength(subpath(floor t,t) of P) /
+            arclength(subpath(floor t,ceiling t) of P));
+      if alw_perpendicular:
+        a := 90;
+      else:
+        a := w[dirs[floor t],dirs[ceiling t]];
+      fi;
+      l := w[lengths[floor t],lengths[ceiling t]];
+    else:
+      if alw_perpendicular:
+        a := 90;
+      else:
+        a:= dirs[t];
+      fi;
+      l:=lengths[t];
+    fi;
+
+    a := a + angle(thdir(P,t));
+
+    thdraw (point t of P) --
+      ((point t of P) + if par: 0.333 * fi l * unitvector(dir(a)));
+    cas := cas + mojkrok;
+    par := not par;
+    exitif cas > dlzka + offset + 0.1mm;  % for rounding errors
+  endfor;
+  if S = 1: pickup PenB; draw P fi;
+%pickup pencircle scaled 3pt;
+%for i=0 upto li: draw point i of P; endfor;
+enddef;
+
+initsymbol("l_u_slope");
+let l_slope = l_u_slope;
+
+# Draw the legend. Use legend-specific drawings.
+let clean_legend_box_orig = clean_legend_box;
+def clean_legend_box =
+    running_in_legend := true;
+    clean_legend_box_orig;
+enddef;
+
+endcode
+endlayout
+
+text en "point blocks" "block"
+text en "point debris" "cobbles"
+text en "point passage-height:both" "height above, depth below"
+text en "area debris" "cobbles, small breakdown"
+text en "area pebbles" "pebbles, gravel"
+# text en "area snow" "large rock"
+text en "line ceiling-meander" "ceiling channel"
+text en "line rock-border" "large rock"
+text en "line rock-edge" ""
+text en "line section" ""
+text en "line u:user" ""
+text en "line wall:blocks" "breakdown wall"
+text en "line wall:clay" ""
+text en "line wall:underlying" "fill choke"

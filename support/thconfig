@@ -1,0 +1,39 @@
+encoding  utf-8
+
+input common.th
+
+source deep_lake.th 
+
+
+layout plan
+copy common
+
+units imperial
+# scale 1 50
+
+# color map-fg altitude
+color map-fg [97 86 38]
+
+symbol-set NSS
+symbol-hide line border
+# symbol-hide line survey
+# symbol-hide point station
+# symbol-hide special north-arrow
+# symbol-hide special scale-bar
+
+grid bottom
+grid-size 10 10 10 feet
+
+legend on
+map-comment "FSB1234 Deep Lake Cave: The Deeper Tunnel"
+
+endlayout
+
+
+# export model -o deep_lake.lox
+# export model -format survex
+# export model -format kml
+# export map -proj plan -fmt kml -o deep_lake.kml
+# export model -fmt kml -o deep_lake.kml
+export map -layout plan -projection plan -o Deep_Lake.pdf
+export map -layout plan -projection extended -o Deep_Lake_profile.pdf
