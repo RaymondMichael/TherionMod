@@ -341,11 +341,15 @@ let l_u_user = l_u_u;
 
 # This defines the rockborder you'll see on the map
 def l_u_rockborder_map (expr p) =
-  save q, t, segs, turn, iscycle, inc, originalpt, parallelpt, nextpt, nextpar;
+  save q, t, segs, turn, iscycle, inc, off, originalpt, parallelpt, nextpt, nextpar;
   path q;
-  numeric t, segs, turn, inc;
+  numeric t, segs, turn, inc, off;
   boolean iscycle;
   pair originalpt, parallelpt, nextpt, nextpar;
+
+  % thdraw/thfill apply the global T transform; reset it like every other
+  % custom symbol here does, so leftover T from a prior symbol can't skew us
+  T := identity;
 
   if length p > 0:
     segs := length p;
@@ -376,15 +380,19 @@ def l_u_rockborder_map (expr p) =
       turn := 90;
     fi
 
+    % Clamp the offset to a fraction of the path's own size so tiny loops
+    % (e.g. small-scale insets) don't self-intersect and cancel their fill
+    off := min(0.1u, 0.15 * abs(urcorner(bbox p) - llcorner(bbox p)));
+
     % Build straight-segment parallel with same segment count
-    q := (point 0 of p) + (0.1u) * unitvector(thdir(p,0) rotated turn);
+    q := (point 0 of p) + off * unitvector(thdir(p,0) rotated turn);
 
     inc := 1;
     t := inc;
     forever:
       exitif t > segs;
       q := q -- ((point t of p)
-                 + (0.1u) * unitvector(thdir(p,t) rotated turn));
+                 + off * unitvector(thdir(p,t) rotated turn));
       t := t + inc;
     endfor;
 
@@ -399,8 +407,8 @@ def l_u_rockborder_map (expr p) =
       exitif t >= segs;
       originalpt := point t of p;
       nextpt     := point (t + inc) of p;
-      parallelpt := originalpt + (0.1u) * unitvector(thdir(p,t) rotated turn);
-      nextpar    := nextpt     + (0.1u) * unitvector(thdir(p,t + inc) rotated turn);
+      parallelpt := originalpt + off * unitvector(thdir(p,t) rotated turn);
+      nextpar    := nextpt     + off * unitvector(thdir(p,t + inc) rotated turn);
       thfill originalpt -- nextpt -- nextpar -- parallelpt -- cycle
             withcolor if iscycle: (0.8, 0.8, 0.8) else: (0.1,0.8,0.8) fi;
       t := t + inc;
@@ -414,7 +422,7 @@ def l_u_rockborder_map (expr p) =
     forever:
       exitif t > segs;
       originalpt := point t of p;
-      parallelpt := originalpt + (0.1u) * unitvector(thdir(p,t) rotated turn);
+      parallelpt := originalpt + off * unitvector(thdir(p,t) rotated turn);
       thdraw (originalpt -- parallelpt) withcolor (0.4, 0.4, 0.4) withpen PenD;
       t := t + inc;
     endfor;
